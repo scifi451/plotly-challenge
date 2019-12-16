@@ -2,7 +2,7 @@
 // Incoming data is internally referred to as incomingData
 d3.json("static/data/samples.json").then((incomingData) => {
     function filteredData(data) {
-      return data.samples.otu_ids > 250;
+      return data.samples.otu_ids ==  250;
     }
     console.log(filteredData);
     // Use filter() to pass the function as its argument
