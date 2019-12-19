@@ -9,6 +9,12 @@ console.log(samples);
 samples = samples.slice(0, 10);
 console.log(samples);
 
+function unpack(rows, index) {
+  return rows.map(function(row) {
+    return row[index];
+  });
+}
+
 // Sort the data array using the greekSearchResults value
 samples.sort(function(a, b) {
   return parseFloat(b.samples) - parseFloat(a.samples);
