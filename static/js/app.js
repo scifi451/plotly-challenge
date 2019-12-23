@@ -1,44 +1,131 @@
-// Use d3.json() to fetch data from JSON file
-// Incoming data is internally referred to as incomingData
-d3.json("static/data/samples.json").then((incomingData) => {
-    function filteredData(data) {
-      return data.samples.otu_ids ==  250;
-    }
-    console.log(filteredData);
-    // Use filter() to pass the function as its argument
-    var filteredSample = incomingData.filter(filteredData);
-  
-    //  Check to make sure your are filtering your data.
-    console.log(filteredSample);
-  
-    // Use the map method with the arrow function to return all the filtered movie titles.
-    var otu = filteredSample.map(data =>  data.otu_ids);
-  
-    // Use the map method with the arrow function to return all the filtered movie metascores.
-    var samples = filteredSample.map(data => data.sample_values);
-  
-    // Check your filtered metascores.
-    console.log(filteredSample);
-  
-    // Create your trace.
-    var trace = {
-      x: samples,
-      y: otu,
-      type: "bar",
-      orientation: "h"
+function DrawBarGraph(desiredSampleID)
+{
+    console.log("DrawBarGraph: sample = ", desiredSampleID);
+
+    d3.json("static/data/samples.json").then((data) => {
+
+        var samples = data.samples;
+        var resultArray = samples.filter(sampleObj => sampleObj.id == desiredSampleID);
+        var result = resultArray[0];
+
+        var otu_ids = result.otu_ids;
+        var otu_labels = result.otu_labels;
+        var sample_values = result.sample_values;
+
+        var yticks = otu_ids.slice(0, 10).map(otuID => `OTU ${otuID}`).reverse();    
+        var barData = [
+            {
+                x: sample_values.slice(0, 10).reverse(),
+                y: yticks, 
+                type: "bar",
+                text: otu_labels.slice(0, 10).reverse(),
+                orientation: "h"
+            }
+        ];
+
+    var barLayout = {
+        title: "Top 10 Bacteria Cultures Found",
+        margin: {t: 30, 1: 150}
     };
-  
-    // Create the data array for our plot
-    var data = [trace];
-  
-    // Define the plot layout
-    var layout = {
-      title: "The highest critically acclaimed data.",
-      xaxis: { title: "Title" },
-      yaxis: { title: "Metascore (Critic) Rating"}
-    };
-  
-    // Plot the chart to a div tag with id "bar-plot"
-    Plotly.newPlot("bar", data, layout);
-  });
-  
+
+    Plotly.newPlot("bar", barData, barLayout);
+
+});
+
+}
+
+function DrawBubbleChart(desiredSampleID)
+{
+    console.log("DrawBubbleChart: sample = ", desiredSampleID);    
+
+    d3.json("static/data/samples.json").then((data) => {
+
+        var samples = data.samples;
+        var resultArray = samples.filter(sampleObj => sampleObj.id == desiredSampleID);
+        var result = resultArray[0];
+
+        var otu_ids = result.otu_ids;
+        var otu_labels = result.otu_labels;
+        var sample_values = result.sample_values;
+
+        var bubbleData = [
+            {
+                x: otu_ids,
+                y: sample_values,
+                text: otu_labels,
+                mode: "markers",
+                marker: {
+                    size: sample_values,
+                    color: otu_ids,
+                    colorscale: "Earth"
+                }
+            }
+        ];
+
+        var bubleLayout = {
+            title: "Bacteria Cultures Per Sample",
+            margin: {t: 0},
+            hovermode: "closet",
+            xaxis: {title: "OTU ID"},
+            margin: {t : 30}
+        };
+
+        Plotly.newPlot("bubble", bubbleData, bubleLayout);
+
+    }); 
+}
+
+function ShowMetadata(desiredSampleID)
+{
+    console.log("ShowMetadata: sample = ", desiredSampleID);
+
+    d3.json("static/data/samples.json").then((data) => {
+        var metadata = data.metadata;
+
+        var resultArray = metadata.filter(sampleObj => sampleObj.id == desiredSampleID);
+        var result = resultArray[0];
+
+        var panel = d3.select('#sample-metadata');
+        panel.html("");
+        Object.entries(result).forEach(([key, value]) => {
+            var textToShow = `${key.toUpperCase()}: ${value}`;
+            panel.append("h6").text(textToShow);
+        });
+     });
+
+}
+
+function optionChanged(newSampleID)
+{
+    console.log("Dropdown changed to: ", newSampleID)
+    DrawBarGraph(newSampleID);
+    DrawBubbleChart(newSampleID);
+    ShowMetadata(newSampleID);
+}
+
+function Init ()
+{
+    console.log("initializing screen");
+
+    // populate the drop down with all ID's
+    var selector = d3.select("#selDataset");
+    
+    d3.json("static/data/samples.json").then((data) => {
+        var sampleNames = data.names;
+
+        sampleNames.forEach((sampleID) => {
+            selector
+                .append("option")
+                .text(sampleID)
+                .property("value", sampleID);
+        });
+
+        var sampleID = sampleNames[0];
+
+        DrawBarGraph(sampleID);
+        DrawBubbleChart(sampleID);
+        ShowMetadata(sampleID);
+    });
+}
+
+Init ();
