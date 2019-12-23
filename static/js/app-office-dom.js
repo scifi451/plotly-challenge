@@ -1,6 +1,6 @@
-function DrawBargraph(desiredSampleID)
+function DrawBarGraph(desiredSampleID)
 {
-    console.log("DrawBargraph: sample = ", desiredSampleID);
+    console.log("DrawBarGraph: sample = ", desiredSampleID);
 
     d3.json("static/data/samples.json").then((data) => {
 
@@ -69,7 +69,9 @@ function DrawBubbleChart(desiredSampleID)
             xaxis: {title: "OTU ID"},
             margin: {t : 30}
         };
+
         Plotly.newPlot("bubble", bubbleData, bubleLayout);
+
     }); 
 }
 
@@ -96,8 +98,8 @@ function ShowMetadata(desiredSampleID)
 function optionChanged(newSampleID)
 {
     console.log("Dropdown changed to: ", newSampleID)
-    DrawBargraph(newSampleID);
-    // DrawBubbleChart(newSampleID);
+    DrawBarGraph(newSampleID);
+    DrawBubbleChart(newSampleID);
     ShowMetadata(newSampleID);
 }
 
@@ -117,17 +119,13 @@ function Init ()
                 .text(sampleID)
                 .property("value", sampleID);
         });
-        var sampleID = samplesNames[0];
 
-        DrawBargraph(sampleID);
+        var sampleID = sampleNames[0];
+
+        DrawBarGraph(sampleID);
         DrawBubbleChart(sampleID);
         ShowMetadata(sampleID);
-
     });
-    
-
-    
-
 }
 
 Init ();
